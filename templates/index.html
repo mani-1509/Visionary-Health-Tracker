@@ -1,61 +1,194 @@
-<head>
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='css/index.css') }}"
-  />
-</head>
-{% extends "base.html" %}{% block content %}
+{% extends "base.html" %} {% block extra_head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/index.css') }}"
+/>
+{% endblock %} {% block content %}
 
-<div class="brainrot">
-  <a href="#" id="brainrot-link"
-    >◁<span id="brainrot-text" class="hidden">Brainrot content⚠️</span></a
-  >
-</div>
-
-<header class="hero-section">
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-glow-backdrop"></div>
   <div class="hero-content">
-    <h1>Your Personal AI Health Companion</h1>
-    <p>
-      Monitor and improve your health with real-time insights and
-      recommendations powered by advanced AI and computer vision technology.
+    <h1 class="hero-title">
+      Your Personal <span class="gradient-text">AI Health Companion</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Monitor and optimize your wellness with real-time computer vision
+      analysis, nutritional tracking, and personalized telemetry insights
+      powered by state-of-the-art AI.
     </p>
-    <a href="/camera" class="btn">Start Tracking Now</a>
-  </div>
-</header>
 
-<section id="features" class="features-section">
-  <h2>Core Features</h2>
+    <!-- Brainrot Easter Egg Link -->
+    <div class="hero-actions">
+      <a href="/camera" class="btn-primary">
+        <span>Start Tracking Now</span>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </a>
+      <a href="/health-metrics" class="btn-secondary">
+        <span>Enter Telemetry Data</span>
+      </a>
+    </div>
+
+    <!-- Stat Highlights Grid -->
+    <div class="hero-stats">
+      <div class="stat-card glass-card">
+        <span class="stat-number">99.4%</span>
+        <span class="stat-label">Vision Recognition</span>
+      </div>
+      <div class="stat-card glass-card">
+        <span class="stat-number">&lt; 1.5s</span>
+        <span class="stat-label">Real-Time Processing</span>
+      </div>
+      <div class="stat-card glass-card">
+        <span class="stat-number">24/7</span>
+        <span class="stat-label">AI Health Guidance</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Core Features Section -->
+<section id="features" class="section-container">
+  <div class="section-header">
+    <span class="section-tag">Powerful Capabilities</span>
+    <h2 class="section-title">Core Telemetry Features</h2>
+    <p class="section-desc">
+      Designed to give you full clarity into your health metrics and daily
+      nutrition.
+    </p>
+  </div>
+
   <div class="feature-grid">
-    <div class="feature-item">
-      <h3>Live Image Recognition</h3>
+    <div class="feature-card glass-card">
+      <div class="feature-icon-badge">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+          />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
+      </div>
+      <h3>Live Vision Recognition</h3>
       <p>
-        Use your camera to analyze meals and exercise routines for real-time
-        feedback and insights.
+        Use your camera or file upload to scan meals and workout setups for
+        immediate AI nutritional analysis and form feedback.
       </p>
     </div>
-    <div class="feature-item">
-      <h3>Health Metric Tracking</h3>
+
+    <div class="feature-card glass-card">
+      <div class="feature-icon-badge">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+      </div>
+      <h3>Health Telemetry Tracking</h3>
       <p>
-        Input metrics like heart rate and calorie count for personalized health
-        tips and improvements.
+        Log heart rate, blood pressure, and daily caloric intake to generate
+        personalized AI wellness recommendations.
       </p>
     </div>
-    <div class="feature-item">
-      <h3>Progress Monitoring</h3>
-      <p>Track your progress with visual reports, graphs, and trends.</p>
+
+    <div class="feature-card glass-card">
+      <div class="feature-icon-badge">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      </div>
+      <h3>Analytics & Trends</h3>
+      <p>
+        Visualize historical telemetry trends with interactive Chart.js line
+        graphs and chronological health logs.
+      </p>
     </div>
   </div>
 </section>
 
-<section id="about" class="about-section">
-  <h2>About Visionary Health Tracker</h2>
-  <p>
-    Visionary Health Tracker is a cutting-edge web application designed to
-    simplify health monitoring and improvement. With advanced AI and computer
-    vision models, it offers real-time insights and personalized recommendations
-    to help users achieve their wellness goals.
-  </p>
+<!-- Visual Workflow Stepper -->
+<section class="section-container workflow-section">
+  <div class="section-header">
+    <span class="section-tag">Simple Workflow</span>
+    <h2 class="section-title">How Visionary Health Works</h2>
+  </div>
+
+  <div class="steps-grid">
+    <div class="step-card glass-card">
+      <span class="step-number">01</span>
+      <h4>Scan or Input</h4>
+      <p>
+        Capture a photo of your meal/workout or record your vital signs in
+        seconds.
+      </p>
+    </div>
+    <div class="step-card glass-card">
+      <span class="step-number">02</span>
+      <h4>AI Analysis</h4>
+      <p>
+        Our vision LLM models dissect nutrients, check form, and process vital
+        metrics.
+      </p>
+    </div>
+    <div class="step-card glass-card">
+      <span class="step-number">03</span>
+      <h4>Actionable Tips</h4>
+      <p>
+        Receive tailored health tips and watch your trends improve over time.
+      </p>
+    </div>
+  </div>
 </section>
 
+<!-- About Section -->
+<section id="about" class="section-container about-section">
+  <div class="about-card glass-card">
+    <div class="about-content">
+      <span class="section-tag">About Us</span>
+      <h2>Cutting-Edge Health Intelligence</h2>
+      <p>
+        Visionary Health Tracker is a web-based wellness intelligence
+        application designed to simplify daily health monitoring. By uniting
+        multimodal vision AI with health telemetry data, Visionary Health
+        provides actionable insights that help users take charge of their
+        lifestyle goals.
+      </p>
+      <div class="about-cta">
+        <a href="/register" class="btn-primary">Create Your Account</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block extra_js %}
 <script src="{{ url_for('static', filename='js/brainrot.js') }}"></script>
 {% endblock %}

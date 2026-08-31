@@ -1,38 +1,61 @@
+import os
 from flask import Blueprint, request, jsonify, session
-from .models import db, HealthMetric
+from .models import db, HealthMetric, User
 from functools import wraps
 from openai import OpenAI
-import os
 
 health_metric = Blueprint('health_metric', __name__)
 
-# Initialize OpenAI client
-client = OpenAI(
-    base_url="https://api.studio.nebius.ai/v1/",
-    api_key=os.getenv("NEBIUS_API_KEY"),
-)
+def get_openai_client():
+    api_key = os.getenv("NEBIUS_API_KEY")
+    if not api_key:
+        return None
+    return OpenAI(
+        base_url="https://api.studio.nebius.ai/v1/",
+        api_key=api_key,
+    )
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return jsonify({"error": "Login required"}), 401
+        user = db.session.get(User, session['user_id'])
+        if not user:
+            session.pop('user_id', None)
+            return jsonify({"error": "Session invalid"}), 401
         return f(*args, **kwargs)
     return decorated_function
+
+def parse_int(val):
+    if val is None or val == "":
+        return None
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return None
 
 @health_metric.route('/api/health-metrics', methods=['POST'])
 @login_required
 def add_health_metric():
     try:
-        data = request.json
+        data = request.get_json(silent=True) or request.form or {}
         user_id = session['user_id']
         
+        heart_rate = parse_int(data.get('heart_rate'))
+        blood_pressure_systolic = parse_int(data.get('blood_pressure_systolic'))
+        blood_pressure_diastolic = parse_int(data.get('blood_pressure_diastolic'))
+        calorie_count = parse_int(data.get('calorie_count'))
+
+        if heart_rate is None and blood_pressure_systolic is None and blood_pressure_diastolic is None and calorie_count is None:
+            return jsonify({"error": "At least one health metric must be provided"}), 400
+
         new_metric = HealthMetric(
             user_id=user_id,
-            heart_rate=data.get('heart_rate'),
-            blood_pressure_systolic=data.get('blood_pressure_systolic'),
-            blood_pressure_diastolic=data.get('blood_pressure_diastolic'),
-            calorie_count=data.get('calorie_count')
+            heart_rate=heart_rate,
+            blood_pressure_systolic=blood_pressure_systolic,
+            blood_pressure_diastolic=blood_pressure_diastolic,
+            calorie_count=calorie_count
         )
         
         db.session.add(new_metric)
@@ -61,7 +84,7 @@ def get_health_metrics():
                 "blood_pressure_systolic": metric.blood_pressure_systolic,
                 "blood_pressure_diastolic": metric.blood_pressure_diastolic,
                 "calorie_count": metric.calorie_count,
-                "timestamp": metric.timestamp.isoformat()
+                "timestamp": metric.timestamp.isoformat() if metric.timestamp else None
             } for metric in metrics]
         }), 200
         
@@ -78,11 +101,22 @@ def get_health_tips():
         if not latest_metric:
             return jsonify({"message": "No health metrics found"}), 404
             
+        client = get_openai_client()
+        if not client:
+            return jsonify({
+                "health_tips": "AI Health Assistant Notice: NEBIUS_API_KEY environment variable is not configured. Please configure your API key to enable AI health tips.",
+                "metrics": {
+                    "heart_rate": latest_metric.heart_rate if latest_metric.heart_rate is not None else "N/A",
+                    "blood_pressure": f"{latest_metric.blood_pressure_systolic or 'N/A'}/{latest_metric.blood_pressure_diastolic or 'N/A'}",
+                    "calorie_count": latest_metric.calorie_count if latest_metric.calorie_count is not None else "N/A"
+                }
+            }), 200
+
         prompt = f"""
         Based on the following health metrics:
-        Heart Rate: {latest_metric.heart_rate}
-        Blood Pressure: {latest_metric.blood_pressure_systolic}/{latest_metric.blood_pressure_diastolic}
-        Calorie Count: {latest_metric.calorie_count}
+        Heart Rate: {latest_metric.heart_rate or 'N/A'} BPM
+        Blood Pressure: {latest_metric.blood_pressure_systolic or 'N/A'}/{latest_metric.blood_pressure_diastolic or 'N/A'} mmHg
+        Calorie Count: {latest_metric.calorie_count or 'N/A'} kcal
 
         Provide personalized health tips and recommendations for improving wellness.
         """
@@ -98,9 +132,9 @@ def get_health_tips():
         return jsonify({
             "health_tips": health_tips,
             "metrics": {
-                "heart_rate": latest_metric.heart_rate,
-                "blood_pressure": f"{latest_metric.blood_pressure_systolic}/{latest_metric.blood_pressure_diastolic}",
-                "calorie_count": latest_metric.calorie_count
+                "heart_rate": latest_metric.heart_rate if latest_metric.heart_rate is not None else "N/A",
+                "blood_pressure": f"{latest_metric.blood_pressure_systolic or 'N/A'}/{latest_metric.blood_pressure_diastolic or 'N/A'}",
+                "calorie_count": latest_metric.calorie_count if latest_metric.calorie_count is not None else "N/A"
             }
         }), 200
         
@@ -136,11 +170,15 @@ def update_health_metric(metric_id):
         if not metric:
             return jsonify({"error": "Health metric not found"}), 404
         
-        data = request.json
-        metric.heart_rate = data.get('heart_rate', metric.heart_rate)
-        metric.blood_pressure_systolic = data.get('blood_pressure_systolic', metric.blood_pressure_systolic)
-        metric.blood_pressure_diastolic = data.get('blood_pressure_diastolic', metric.blood_pressure_diastolic)
-        metric.calorie_count = data.get('calorie_count', metric.calorie_count)
+        data = request.get_json(silent=True) or request.form or {}
+        if 'heart_rate' in data:
+            metric.heart_rate = parse_int(data['heart_rate'])
+        if 'blood_pressure_systolic' in data:
+            metric.blood_pressure_systolic = parse_int(data['blood_pressure_systolic'])
+        if 'blood_pressure_diastolic' in data:
+            metric.blood_pressure_diastolic = parse_int(data['blood_pressure_diastolic'])
+        if 'calorie_count' in data:
+            metric.calorie_count = parse_int(data['calorie_count'])
         
         db.session.commit()
         
@@ -166,7 +204,7 @@ def get_health_metric(metric_id):
             "blood_pressure_systolic": metric.blood_pressure_systolic,
             "blood_pressure_diastolic": metric.blood_pressure_diastolic,
             "calorie_count": metric.calorie_count,
-            "timestamp": metric.timestamp.isoformat()
+            "timestamp": metric.timestamp.isoformat() if metric.timestamp else None
         }), 200
         
     except Exception as e:
@@ -182,10 +220,15 @@ def get_health_metrics_summary():
         if not metrics:
             return jsonify({"message": "No health metrics found"}), 404
         
-        heart_rate_avg = sum([metric.heart_rate for metric in metrics]) / len(metrics)
-        bp_systolic_avg = sum([metric.blood_pressure_systolic for metric in metrics]) / len(metrics)
-        bp_diastolic_avg = sum([metric.blood_pressure_diastolic for metric in metrics]) / len(metrics)
-        calorie_count_avg = sum([metric.calorie_count for metric in metrics]) / len(metrics)
+        heart_rates = [m.heart_rate for m in metrics if m.heart_rate is not None]
+        bp_systolics = [m.blood_pressure_systolic for m in metrics if m.blood_pressure_systolic is not None]
+        bp_diastolics = [m.blood_pressure_diastolic for m in metrics if m.blood_pressure_diastolic is not None]
+        calories = [m.calorie_count for m in metrics if m.calorie_count is not None]
+
+        heart_rate_avg = round(sum(heart_rates) / len(heart_rates), 1) if heart_rates else 0
+        bp_systolic_avg = round(sum(bp_systolics) / len(bp_systolics), 1) if bp_systolics else 0
+        bp_diastolic_avg = round(sum(bp_diastolics) / len(bp_diastolics), 1) if bp_diastolics else 0
+        calorie_count_avg = round(sum(calories) / len(calories), 1) if calories else 0
         
         return jsonify({
             "heart_rate_avg": heart_rate_avg,

@@ -1,26 +1,39 @@
+import os
 from openai import OpenAI
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-import os
+
 class VisionAPI:
     def __init__(self):
-        # Configure Cloudinary
-        cloudinary.config(
-            cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-            api_key=os.getenv("CLOUDINARY_API_KEY"),
-            api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-        )
+        pass
+
+    def _configure_cloudinary(self):
+        cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+        api_key = os.getenv("CLOUDINARY_API_KEY")
+        api_secret = os.getenv("CLOUDINARY_API_SECRET")
+        if not cloud_name or not api_key or not api_secret:
+            raise Exception("Cloudinary credentials (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) are not configured.")
         
-        # Configure OpenAI client
-        self.client = OpenAI(
+        cloudinary.config(
+            cloud_name=cloud_name,
+            api_key=api_key,
+            api_secret=api_secret,
+        )
+
+    def _get_openai_client(self):
+        api_key = os.getenv("NEBIUS_API_KEY")
+        if not api_key:
+            return None
+        return OpenAI(
             base_url="https://api.studio.nebius.ai/v1/",
-            api_key=os.getenv("NEBIUS_API_KEY"),
+            api_key=api_key,
         )
 
     def upload_to_cloudinary(self, file):
         """Uploads an image file to Cloudinary and returns its URL."""
         try:
+            self._configure_cloudinary()
             upload_result = cloudinary.uploader.upload(file)
             return upload_result.get("url")
         except Exception as e:
@@ -29,7 +42,11 @@ class VisionAPI:
     def analyze_image(self, image_url):
         """Analyzes the image URL using OpenAI's vision model."""
         try:
-            response = self.client.chat.completions.create(
+            client = self._get_openai_client()
+            if not client:
+                return "Vision AI Analysis Notice: NEBIUS_API_KEY is not configured. Please set your NEBIUS_API_KEY environment variable to receive AI vision analysis for your image."
+
+            response = client.chat.completions.create(
                 model="Qwen/Qwen2-VL-72B-Instruct",
                 messages=[
                     {

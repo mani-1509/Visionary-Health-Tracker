@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+  .settings-page-wrapper {
+    max-width: 840px;
+    margin: 20px auto 60px auto;
+  }
+
+  .settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .settings-card {
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(26, 16, 63, 0.7), rgba(15, 10, 33, 0.85));
+  }
+
+  .settings-section-title {
+    font-size: 1.25rem;
+    color: #ffffff;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .settings-section-title svg {
+    color: var(--accent-light);
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(11, 7, 24, 0.5);
+    padding: 18px 24px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-glass);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(139, 92, 246, 0.15);
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  .info-val {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: white;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition-normal);
+  }
+
+  .btn-danger:hover {
+    background: linear-gradient(135deg, #f87171, #dc2626);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+  }
+
+  .settings-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-page-wrapper">
+  <!-- Page Header -->
+  <div class="page-header">
+    <span class="section-tag">System Preferences</span>
+    <h1 class="page-title">Account & App Settings</h1>
+    <p class="page-subtitle">Manage your account info, telemetry data, and AI engine parameters.</p>
+  </div>
+
+  <div class="settings-grid">
+    <!-- User Profile Info -->
+    <div class="settings-card glass-card">
+      <h2 class="settings-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Account Profile Details
+      </h2>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="info-label">Username</span>
+          <span class="info-val">{{ user.username }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email Address</span>
+          <span class="info-val">{{ user.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Account Created</span>
+          <span class="info-val">{{ user.created_at.strftime('%B %d, %Y') if user.created_at else '2026' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="settings-card glass-card">
+      <h2 class="settings-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Telemetry Data Management
+      </h2>
+      <p class="settings-desc">
+        Purge all recorded vital signs and telemetry history (heart rate, blood pressure, calories). This action cannot be undone.
+      </p>
+      <div>
+        <button id="clearMetricsBtn" class="btn-danger">Clear All Telemetry History</button>
+      </div>
+    </div>
+
+    <!-- AI Engine Specs -->
+    <div class="settings-card glass-card">
+      <h2 class="settings-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        AI Vision Engine Configuration
+      </h2>
+      <p class="settings-desc">
+        Visionary Health Tracker leverages <strong>Nebius Studio Cloud API</strong> running <code>Llama-3.3-70B-Instruct</code> for telemetry health guidance and <code>Qwen2-VL-72B-Instruct</code> for live vision recognition. Set <code>NEBIUS_API_KEY</code> on your environment server for live inference.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.getElementById('clearMetricsBtn').addEventListener('click', async () => {
+    if (confirm('Are you sure you want to delete all your recorded telemetry metrics? This action cannot be undone.')) {
+      try {
+        const response = await fetch('/api/health-metrics/summary', {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert(data.message || 'Telemetry metrics purged successfully!');
+          window.location.href = '/profile';
+        } else {
+          alert('Error: ' + (data.error || data.message || 'Failed to clear metrics'));
+        }
+      } catch (err) {
+        alert('Failed to delete metrics: ' + err.message);
+      }
+    }
+  });
+</script>
+{% endblock %}

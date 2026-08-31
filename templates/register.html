@@ -1,120 +1,154 @@
-<head>
-  <style>
-    .signupContainer {
-      height: 100vh;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-    }
-    .signupWapper {
-      border-radius: 20px;
-      text-align: center;
-      border: 1px solid #4c1d95;
-      box-shadow: 10px 10px 10px 8px rgba(0, 0, 0, 0.1);
-      height: auto;
-      width: auto;
-      padding: 50px 30px;
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
-    }
+{% extends "base.html" %}
 
-    .signupUsername,
-    .signupPassword,
-    .signupemail {
-      padding: 10px 18px;
-      background-color: transparent;
-      border: 2px solid rgba(139, 92, 246, 0.6);
-      border-radius: 500px;
-      text-align: center;
-    }
-    input:not(placeholder-shown) {
-      background-color: transparent;
-    }
-    ::placeholder {
-      text-align: center;
-      color: #b0b0b0;
-      font-family: sans-serif;
-    }
-    input:invalid:not(:placeholder-shown) {
-      border: 2px solid red;
-    }
-    input:valid:not(:placeholder-shown) {
-      border: 2px solid rgba(139, 92, 246, 0.6);
-    }
-    input:invalid ~ button[type="submit"] {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-    .signupBtn {
-      background: #4c1d95;
-      color: #f3e8ff;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      animation: fadeIn 0.5s ease-in;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-    }
-    .signupBtn:hover {
-      background: #5b21b6;
-      transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
-      border-color: rgba(139, 92, 246, 0.6);
-    }
-    form p a {
-      text-decoration: none;
-      font-weight: bold;
-    }
-  </style>
-</head>
-{% extends "base.html" %} {% block content %}
-<div class="signupContainer">
-  <div class="signupWapper">
-    <h1 class="signupText">Register</h1>
-    <br />
-    <form method="POST" action="/register" class="boxxs">
-      <label for="username">Username:</label>
-      <input
-        class="signupUsername"
-        type="text"
-        id="username"
-        name="username"
-        placeholder="UserName"
-        required
-      /><br />
-      <br />
-      <label for="email">Email:</label>
-      <input
-        class="signupemail"
-        type="email"
-        id="email"
-        name="email"
-        placeholder="Email"
-        required
-      />
-      <br />
-      <br />
-      <label for="password">Password:</label>
-      <input
-        class="signupPassword"
-        type="password"
-        id="password"
-        name="password"
-        placeholder="Password"
-        minlength="8"
-        required
-      /><br />
-      <br />
-      <p>Already have an account? <a href="/login">Login</a>.</p>
-      <button class="signupBtn" type="submit">Signup</button>
-      <br /><br />
+{% block extra_head %}
+<style>
+  .auth-page-wrapper {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 44px 36px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(26, 16, 63, 0.75), rgba(15, 10, 33, 0.9));
+  }
+
+  .auth-header {
+    margin-bottom: 30px;
+  }
+
+  .auth-header h1 {
+    font-size: 2rem;
+    margin-bottom: 6px;
+  }
+
+  .auth-header p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: left;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-field label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .auth-input {
+    width: 100%;
+    padding: 12px 18px;
+    background: rgba(11, 7, 24, 0.6);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-full);
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 0.98rem;
+    transition: var(--transition-fast);
+  }
+
+  .auth-input:focus {
+    outline: none;
+    border-color: var(--accent-light);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  .auth-footer-text {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .auth-footer-text a {
+    color: var(--accent-light);
+    font-weight: 600;
+  }
+
+  .error-alert {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 15px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+  <div class="auth-card glass-card">
+    <div class="auth-header">
+      <h1>Create Account</h1>
+      <p>Start tracking your health telemetry with AI guidance</p>
+    </div>
+
+    <form method="POST" action="/register" class="auth-form">
+      <div class="form-field">
+        <label for="username">Username</label>
+        <input
+          class="auth-input"
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Choose a username"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email Address</label>
+        <input
+          class="auth-input"
+          type="email"
+          id="email"
+          name="email"
+          placeholder="your.email@example.com"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input
+          class="auth-input"
+          type="password"
+          id="password"
+          name="password"
+          placeholder="At least 8 characters"
+          minlength="8"
+          required
+        />
+      </div>
+
+      <button class="btn-primary" type="submit" style="width: 100%; margin-top: 10px;">Sign Up</button>
+      
+      <p class="auth-footer-text">
+        Already have an account? <a href="/login">Log in here</a>
+      </p>
     </form>
+
     {% if error %}
-    <p style="color: red">{{ error }}</p>
-    <br /><br />
+    <div class="error-alert">{{ error }}</div>
     {% endif %}
   </div>
 </div>

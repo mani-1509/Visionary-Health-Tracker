@@ -2,12 +2,27 @@ document.addEventListener("DOMContentLoaded", function () {
   const healthMetricForm = document.getElementById("health-metric-form");
   const healthTipsContainer = document.getElementById("health-tips");
 
+  if (!healthMetricForm) return;
+
   // Handle form submission
   healthMetricForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const formData = new FormData(healthMetricForm);
-    const data = Object.fromEntries(formData.entries());
+    const rawData = Object.fromEntries(formData.entries());
+    
+    // Filter out empty fields
+    const data = {};
+    for (const [key, value] of Object.entries(rawData)) {
+      if (value !== "" && value !== null && value !== undefined) {
+        data[key] = parseInt(value, 10);
+      }
+    }
+
+    if (Object.keys(data).length === 0) {
+      alert("Please enter at least one health metric before submitting.");
+      return;
+    }
 
     try {
       const response = await fetch("/api/health-metrics", {
@@ -18,8 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify(data),
       });
 
+      const resData = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to submit metrics");
+        throw new Error(resData.error || "Failed to submit metrics");
       }
 
       // Clear form
@@ -31,94 +48,47 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Health metrics submitted successfully!");
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to submit health metrics. Please try again.");
+      alert("Failed to submit health metrics: " + error.message);
     }
   });
 
-  // Convert text to markdown
-  function convertToMarkdown(text) {
-    const lines = text.split("\n");
-    let markdown = "";
-    let inList = false;
-
-    lines.forEach((line) => {
-      line = line.trim();
-
-      if (line === "") {
-        markdown += "\n";
-        inList = false;
-      } else if (line.match(/^Based on the provided health metrics/i)) {
-        markdown += "# Personalized Health Tips and Recommendations\n\n";
-        markdown += line + "\n\n";
-      } else if (line.match(/^(Heart Rate|Blood Pressure|Calorie Count):/i)) {
-        const [metric, value] = line.split(":");
-        markdown += `## ${metric.trim()}: ${value.trim()}\n\n`;
-      } else if (line.match(/^\d+\.\s/)) {
-        if (!inList) {
-          markdown += "\n";
-          inList = true;
-        }
-        markdown += line + "\n";
-      } else if (line.match(/^Additional Recommendations$/i)) {
-        markdown += "## " + line + "\n\n";
-      } else if (line.match(/^By following these personalized/i)) {
-        markdown += "\n" + line + "\n";
-      } else {
-        if (inList) {
-          markdown += "\n";
-          inList = false;
-        }
-        markdown += line + "\n";
-      }
-    });
-
-    return markdown.trim();
-  }
-
   // Load health tips
   async function loadHealthTips() {
+    if (!healthTipsContainer) return;
+
     try {
       const response = await fetch("/api/health-tips");
       if (!response.ok) {
-        throw new Error("Failed to fetch health tips");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || "Failed to fetch health tips");
       }
 
       const data = await response.json();
-      const markdownTips = convertToMarkdown(data.health_tips);
+      const rawTips = data.health_tips || "";
+      const renderedHtml = typeof marked !== "undefined" ? marked.parse(rawTips) : rawTips.replace(/\n/g, "<br>");
+
+      const hrDisplay = data.metrics.heart_rate !== "N/A" ? `${data.metrics.heart_rate} BPM` : 'N/A';
+      const calDisplay = data.metrics.calorie_count !== "N/A" ? `${data.metrics.calorie_count} kcal` : 'N/A';
 
       healthTipsContainer.innerHTML = `
-            <div class="tips-content">
-              <div id="markdown-tips"></div>
-              <div class="current-metrics">
-                <h3>Current Metrics:</h3>
-                <p>Heart Rate: ${data.metrics.heart_rate} BPM</p>
-                <p>Blood Pressure: ${data.metrics.blood_pressure} mmHg</p>
-                <p>Calorie Count: ${data.metrics.calorie_count} 
-                kcal</p>
-              </div>
-            </div>
-          `;
-
-      // Use a markdown rendering library to convert markdown to HTML
-      // For this example, we'll use a placeholder function
-      document.getElementById("markdown-tips").innerHTML =
-        renderMarkdown(markdownTips);
+        <div class="tips-content">
+          <div id="markdown-tips">${renderedHtml}</div>
+          <div class="current-metrics" style="margin-top: 20px; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 10px;">
+            <h3>Current Metrics:</h3>
+            <p>Heart Rate: ${hrDisplay}</p>
+            <p>Blood Pressure: ${data.metrics.blood_pressure} mmHg</p>
+            <p>Calorie Count: ${calDisplay}</p>
+          </div>
+        </div>
+      `;
     } catch (error) {
-      console.error("Error:", error);
-      healthTipsContainer.innerHTML =
-        "<p>Unable to load health tips at this time.</p>";
+      console.error("Error loading health tips:", error);
+      healthTipsContainer.innerHTML = `
+        <p>Submit your metrics to receive personalized health tips.</p>
+      `;
     }
   }
 
-  // Placeholder function for markdown rendering
-  function renderMarkdown(markdown) {
-    // In a real application, you would use a library like marked or showdown
-    // to convert markdown to HTML. For this example, we'll do a simple conversion.
-    return markdown
-      .replace(/^# (.*$)/gm, "<h1>$1</h1>")
-      .replace(/^## (.*$)/gm, "<h2>$1</h2>")
-      .replace(/^### (.*$)/gm, "<h3>$1</h3>")
-      .replace(/\n\n/g, "<br><br>")
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  }
+  // Load tips on page load
+  loadHealthTips();
 });

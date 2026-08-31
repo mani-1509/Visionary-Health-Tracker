@@ -1,39 +1,157 @@
+{% extends "base.html" %}
 
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/camera.css') }}" />
-  </head>
-  
-  {% extends "base.html" %}{% block content %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/camera.css') }}" />
+{% endblock %}
 
-    <div class="camcontainer">
-      <div class="cam_content">
-        <h1>Capture an Image or Upload a File</h1>
-        <div class="camera-section">
-          <video id="video" width="320" height="240" autoplay></video>
-          <div class="button-group">
-            <button id="startBtn">Start Camera</button>
-            <button id="stopBtn" disabled>Stop Camera</button>
-            <button id="captureBtn" disabled>Capture Image</button>
+{% block content %}
+<div class="camera-page-wrapper">
+  <!-- Page Header -->
+  <div class="page-header">
+    <span class="section-tag">AI Computer Vision</span>
+    <h1 class="page-title">Live Vision & Meal Telemetry</h1>
+    <p class="page-subtitle">Scan meals or workout setups using your camera or upload an image for immediate AI analysis.</p>
+  </div>
+
+  <div class="camera-grid">
+    <!-- Camera / Upload Source Panel -->
+    <div class="source-panel glass-card">
+      <div class="panel-header">
+        <h2 class="panel-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Image Source
+        </h2>
+      </div>
+
+      <!-- Mode Tabs -->
+      <div class="mode-tabs">
+        <button class="tab-btn active" id="webcamTabBtn">Webcam Stream</button>
+        <button class="tab-btn" id="uploadTabBtn">File Upload / URL</button>
+      </div>
+
+      <!-- Tab 1: Webcam Stream -->
+      <div class="tab-content active" id="webcamTabContent">
+        <div class="viewport-container">
+          <video id="video" width="320" height="240" autoplay playsinline></video>
+          
+          <!-- Viewfinder Scanning Frame Overlay -->
+          <div class="viewfinder-overlay">
+            <span class="corner top-left"></span>
+            <span class="corner top-right"></span>
+            <span class="corner bottom-left"></span>
+            <span class="corner bottom-right"></span>
+            <div class="scan-line"></div>
           </div>
-          <canvas id="canvas" width="320" height="240"></canvas>
-          <img id="capturedImage" src="" alt="Captured Image" />
+
+          <div class="live-indicator">
+            <span class="dot"></span> LIVE SCANNER
+          </div>
+
+          <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
         </div>
-  
-        <div class="upload-section">
-          <h2>Or Upload a File</h2>
-          <form id="uploadForm">
-            <form id="uploadForm">
-              <input type="file" id="imageFile" name="file" accept="image/*" />
-              <input type="url" id="imageUrl" placeholder="Or paste image URL" />
-              <button type="submit">Submit</button>
-              <button type="button" id="clearBtn">Clear</button> 
-            </form>
+
+        <div class="controls-toolbar">
+          <button id="startBtn" class="btn-primary">
+            <span>Start Camera</span>
+          </button>
+          <button id="stopBtn" class="btn-secondary" disabled>
+            <span>Stop</span>
+          </button>
+          <button id="captureBtn" class="btn-primary btn-glow" disabled>
+            <span>Capture & Analyze</span>
+          </button>
         </div>
       </div>
 
-      <div id="result"></div>
+      <!-- Tab 2: File Upload / URL -->
+      <div class="tab-content" id="uploadTabContent">
+        <form id="uploadForm" class="upload-form">
+          <div class="dropzone-area" id="dropzoneArea">
+            <div class="dropzone-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <p class="dropzone-text">Click to choose image file</p>
+            <span class="dropzone-subtext">JPG, PNG, WEBP supported</span>
+            <input type="file" id="imageFile" name="file" accept="image/*" class="file-input-hidden" />
+          </div>
+
+          <div class="divider-text"><span>OR PASTE IMAGE URL</span></div>
+
+          <div class="url-input-group">
+            <input type="url" id="imageUrl" class="text-input" placeholder="https://example.com/meal-image.jpg" />
+          </div>
+
+          <div class="upload-actions">
+            <button type="submit" class="btn-primary" style="width: 100%;">Analyze Uploaded Image</button>
+            <button type="button" id="clearBtn" class="btn-secondary">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Captured Image Preview Box -->
+      <div class="preview-container">
+        <h4 class="preview-title">Target Image Preview</h4>
+        <div class="preview-box">
+          <img id="capturedImage" src="" alt="Target Image Preview" />
+        </div>
+      </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
-  {% endblock %}
+    <!-- AI Output & Analysis Panel -->
+    <div class="analysis-panel glass-card">
+      <div class="panel-header">
+        <h2 class="panel-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          AI Intelligence Telemetry
+        </h2>
+        <span class="ai-model-tag">Qwen2-VL Vision</span>
+      </div>
+
+      <div id="result" class="result-content">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          </div>
+          <h3>Awaiting Image Analysis</h3>
+          <p>Start your camera stream to capture a live image or upload an image file/URL to receive instant AI feedback.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script>
+  // Tab Switching Logic
+  const webcamTabBtn = document.getElementById('webcamTabBtn');
+  const uploadTabBtn = document.getElementById('uploadTabBtn');
+  const webcamTabContent = document.getElementById('webcamTabContent');
+  const uploadTabContent = document.getElementById('uploadTabContent');
+
+  webcamTabBtn.addEventListener('click', () => {
+    webcamTabBtn.classList.add('active');
+    uploadTabBtn.classList.remove('active');
+    webcamTabContent.classList.add('active');
+    uploadTabContent.classList.remove('active');
+  });
+
+  uploadTabBtn.addEventListener('click', () => {
+    uploadTabBtn.classList.add('active');
+    webcamTabBtn.classList.remove('active');
+    uploadTabContent.classList.add('active');
+    webcamTabContent.classList.remove('active');
+  });
+
+  // Dropzone click trigger
+  const dropzoneArea = document.getElementById('dropzoneArea');
+  const imageFile = document.getElementById('imageFile');
+  dropzoneArea.addEventListener('click', () => imageFile.click());
+  imageFile.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      dropzoneArea.querySelector('.dropzone-text').innerText = e.target.files[0].name;
+    }
+  });
+</script>
+{% endblock %}

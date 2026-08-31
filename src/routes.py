@@ -1,35 +1,38 @@
+import os
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from .object_recognition import VisionAPI
 from .models import db, User, HealthMetric
 from .health_metrics import health_metric
-from openai import OpenAI
 
 routes = Blueprint('routes', __name__)
 vision_api = VisionAPI()
-
-# Initialize OpenAI client
-client = OpenAI(
-    base_url="https://api.studio.nebius.ai/v1/",
-            api_key="eyJhbGciOiJIUzI1NiIsImtpZCI6IlV6SXJWd1h0dnprLVRvdzlLZWstc0M1akptWXBvX1VaVkxUZlpnMDRlOFUiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJnb29nbGUtb2F1dGgyfDEwNzE2MzI4NDkzNTM1MzY2Mzc1NiIsInNjb3BlIjoib3BlbmlkIG9mZmxpbmVfYWNjZXNzIiwiaXNzIjoiYXBpX2tleV9pc3N1ZXIiLCJhdWQiOlsiaHR0cHM6Ly9uZWJpdXMtaW5mZXJlbmNlLmV1LmF1dGgwLmNvbS9hcGkvdjIvIl0sImV4cCI6MTg5NDMwNjM1MCwidXVpZCI6ImRiMzY2YWI3LTJjODEtNGVkZS1hYzZiLWY5Njg5MDgwYWQ1MyIsIm5hbWUiOiJIYWNrYXRob24iLCJleHBpcmVzX2F0IjoiMjAzMC0wMS0xMFQyMDoxMjozMCswMDAwIn0.Uqxspooor2Xnrzp6uoTnqvp3uwZW50M9uTklgkDPtoo"
-)
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('routes.login'))
+        user = db.session.get(User, session['user_id'])
+        if not user:
+            session.pop('user_id', None)
+            return redirect(url_for('routes.login'))
         return f(*args, **kwargs)
     return decorated_function
+
+# Register the health_metric blueprint
+routes.register_blueprint(health_metric)
 
 # Home route
 @routes.route('/')
 def index():
+    user = None
     if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        return render_template('index.html', user=user)
-    return render_template('index.html')
+        user = db.session.get(User, session['user_id'])
+        if not user:
+            session.pop('user_id', None)
+    return render_template('index.html', user=user)
 
 # User registration
 @routes.route('/register', methods=['GET', 'POST'])
@@ -38,14 +41,18 @@ def register():
         data = request.form
         username = data.get('username')
         email = data.get('email')
-        password = generate_password_hash(data.get('password'))
+        raw_password = data.get('password')
+
+        if not username or not email or not raw_password:
+            return render_template('register.html', error="All fields are required"), 400
 
         if User.query.filter_by(email=email).first():
-            return jsonify({"error": "Email already registered"}), 400
+            return render_template('register.html', error="Email already registered"), 400
 
         if User.query.filter_by(username=username).first():
-            return jsonify({"error": "Username already taken"}), 400
+            return render_template('register.html', error="Username already taken"), 400
 
+        password = generate_password_hash(raw_password)
         new_user = User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
@@ -60,9 +67,12 @@ def login():
         username = data.get('username')
         password = data.get('password')
 
+        if not username or not password:
+            return render_template('login.html', error="Username and password are required"), 400
+
         user = User.query.filter_by(username=username).first()
         if not user or not check_password_hash(user.password, password):
-            return jsonify({"error": "Invalid username or password"}), 400
+            return render_template('login.html', error="Invalid username or password"), 400
 
         session['user_id'] = user.id
         return redirect(url_for('routes.index'))
@@ -79,10 +89,9 @@ def logout():
 @routes.route("/profile")
 @login_required
 def profile():
-    user = User.query.get(session['user_id']) 
+    user = db.session.get(User, session['user_id']) 
     metrics = HealthMetric.query.filter_by(user_id=user.id).order_by(HealthMetric.timestamp.desc()).all()
     return render_template("profile.html", user=user, metrics=metrics)
-
 
 # Image processing
 @routes.route('/process', methods=['POST'])
@@ -93,11 +102,15 @@ def process_image():
         
         if 'file' in request.files:
             file = request.files['file']
-            if file.filename != '':
+            if file and file.filename != '':
                 image_url = vision_api.upload_to_cloudinary(file)
                 
-        elif 'image_url' in request.form:
-            image_url = request.form.get('image_url')
+        if not image_url and request.form.get('image_url'):
+            image_url = request.form.get('image_url').strip()
+
+        if not image_url and request.is_json:
+            json_data = request.get_json(silent=True) or {}
+            image_url = json_data.get('image_url')
             
         if not image_url:
             return jsonify({"error": "No valid image provided"}), 400
@@ -110,7 +123,7 @@ def process_image():
         })
 
     except Exception as e:
-        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 @routes.route('/camera')
 @login_required
@@ -120,18 +133,16 @@ def camera():
 @routes.route('/settings')
 @login_required
 def settings():
-    return render_template('settings.html')
+    user = db.session.get(User, session['user_id'])
+    return render_template('settings.html', user=user)
 
 @routes.route('/brainrot')
 def brainrot():
     return render_template('brainrot.html')
 
-# Register the health_metric blueprint
-routes.register_blueprint(health_metric)
-
-# Health Metrics
+# Health Metrics page
 @routes.route('/health-metrics')
 @login_required
 def health_metrics():
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     return render_template('health-metrics.html', user=user)

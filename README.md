@@ -1,86 +1,87 @@
-# Visionary Health Tracker
+# Visionary Health Tracker (`mani-1509`)
+
+[![Author](https://img.shields.io/badge/Author-Sharvan%20Gajula-8b5cf6?style=for-the-badge)](https://www.linkedin.com/in/sharvan-gajula/)
+[![GitHub](https://img.shields.io/badge/GitHub-mani--1509-4c1d95?style=for-the-badge&logo=github)](https://github.com/mani-1509)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Sharvan%20Gajula-0077b5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/sharvan-gajula/)
 
 ## Overview
-The Visionary Health Tracker is a web-based application designed to assist users in monitoring and improving their health and wellness. By utilizing advanced AI technologies, such as Large Language Models (LLMs) and computer vision, the app provides real-time analysis and feedback on meals, exercise routines, and health metrics. The app simplifies the tracking process with live image recognition through a webcam, enabling users to make informed health decisions.
+Visionary Health Tracker is a next-generation web application designed to assist users in monitoring and optimizing their health and wellness. Powered by multimodal vision AI models (Qwen2-VL 72B) and LLM wellness advisors (Llama 3.3 70B), the app provides real-time computer vision analysis on meals and workout setups, as well as personalized health telemetry advice and interactive trends tracking.
+
+---
 
 ## Features
-1. **Live Image Recognition for Meal & Exercise Tracking**:
-   - Users can use their camera to scan meals or exercise setups.
-   - The app recognizes meals and provides nutritional information along with healthier alternatives.
-   - For exercise, it analyzes routines and gives feedback on form and intensity.
+1. **Live Image & Meal Recognition**:
+   - Scan meals or exercise setups using live camera stream or file upload.
+   - Provides AI-driven nutritional breakdown, health feedback, and healthier meal alternatives.
 
-2. **Health Metric Tracking**:
-   - Users can input health metrics such as heart rate, blood pressure, and calories.
-   - The app offers personalized health tips and recommendations based on the provided metrics.
+2. **Vital Signs Telemetry Tracking**:
+   - Log vital metrics such as heart rate (BPM), blood pressure (mmHg), and daily caloric intake (Kcal).
+   - Generates personalized AI wellness advice tailored to your current metrics.
 
-3. **Real-Time Feedback**:
-   - Instant feedback is displayed after performing actions like uploading a meal photo.
-   - AI-driven insights are generated and shown on the screen in real-time.
+3. **Analytics & Historical Dashboard**:
+   - Interactive Chart.js graphs displaying heart rate, blood pressure, and calorie trends over time.
+   - History logs timeline for past entries.
 
-4. **Progress Monitoring and Reports**:
-   - The app tracks user progress over time.
-   - Visual reports, graphs, and trends help users understand their health improvements.
+4. **User Authentication & Profile**:
+   - Secure login & registration system with hashed passwords and session management.
+   - Personalized user profile and data management settings.
 
-5. **User Profiles**:
-   - Each user has a personalized profile storing health data, preferences, and history.
-   - Recommendations are tailored to individual profiles.
+---
 
-## Installation
-1. Clone the repository:
+## Installation & Setup
+
+1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-repo/visionary-health-tracker.git
-   
-2. Navigate to the project directory:
+   git clone https://github.com/mani-1509/Visionary-Health-Tracker.git
+   cd Visionary-Health-Tracker
+   ```
 
+2. **Create & Activate Virtual Environment**:
    ```bash
-   cd visionary-health-tracker
+   py -3.12 -m venv .venv
+   .\.venv\Scripts\activate
+   ```
 
-4. Install dependencies:
-
+3. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
+   ```
 
-5. Run the application:
+4. **Set Environment Variables** *(Optional for AI Features)*:
    ```bash
-    flask run
+   $env:NEBIUS_API_KEY="your_nebius_api_key"
+   $env:CLOUDINARY_CLOUD_NAME="your_cloud_name"
+   $env:CLOUDINARY_API_KEY="your_api_key"
+   $env:CLOUDINARY_API_SECRET="your_api_secret"
+   ```
 
-## Usage
-   1. Open the application in your web browser.
-   2. Upload an image or use the live webcam feature for meal or exercise tracking.
-   3. Input health metrics to receive personalized recommendations.
-   4. View progress reports to track improvements over time.
+5. **Run the Application**:
+   ```bash
+   python app.py
+   ```
+   Open your browser at `http://127.0.0.1:8000`.
 
-## Technologies Used
+---
 
-   1. Frontend: HTML, CSS, JavaScript
-   2. Backend: Flask
-   3. AI Models: LLMs and Computer Vision
-   4. Database: SQLite (or preferred database)
+## Running Automated Tests
 
-## Contributing
+Run the test suite using `pytest`:
 
-Contributions are welcome! Please follow these steps:
-   1. Fork the repository.
-      
-   2. Create a new branch:
-      ```bash
-      git checkout -b feature/your-feature
+```bash
+python -m pytest tests/
+```
 
-   3. Commit your changes:
-      ```bash
-      git commit -m "Add your feature"
+---
 
-   4. Push the branch:
-      ```bash
-      git push origin feature/your-feature
+## Developer Contact & Links
 
-   5. Open a Pull Request.
+- **Creator**: Sharvan Gajula
+- **GitHub**: [https://github.com/mani-1509](https://github.com/mani-1509)
+- **LinkedIn**: [https://www.linkedin.com/in/sharvan-gajula/](https://www.linkedin.com/in/sharvan-gajula/)
+- **Repository**: [https://github.com/mani-1509/Visionary-Health-Tracker](https://github.com/mani-1509/Visionary-Health-Tracker)
+
+---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
-Thank you for using Visionary Health Tracker! 🚀
-
-
-Feel free to adjust the placeholders and add specific details as needed for your project.
+Licensed under the [MIT License](LICENSE).
