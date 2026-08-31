@@ -1,7 +1,11 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from src.routes import routes
 from src.models import db
+
+load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)

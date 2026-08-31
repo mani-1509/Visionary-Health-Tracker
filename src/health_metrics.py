@@ -10,8 +10,9 @@ def get_openai_client():
     api_key = os.getenv("NEBIUS_API_KEY")
     if not api_key:
         return None
+    base_url = os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1/")
     return OpenAI(
-        base_url="https://api.studio.nebius.ai/v1/",
+        base_url=base_url,
         api_key=api_key,
     )
 

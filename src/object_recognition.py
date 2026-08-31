@@ -25,8 +25,9 @@ class VisionAPI:
         api_key = os.getenv("NEBIUS_API_KEY")
         if not api_key:
             return None
+        base_url = os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1/")
         return OpenAI(
-            base_url="https://api.studio.nebius.ai/v1/",
+            base_url=base_url,
             api_key=api_key,
         )
 
@@ -46,9 +47,14 @@ class VisionAPI:
             if not client:
                 return "Vision AI Analysis Notice: NEBIUS_API_KEY is not configured. Please set your NEBIUS_API_KEY environment variable to receive AI vision analysis for your image."
 
+            model_name = os.getenv("NEBIUS_VISION_MODEL", "Qwen/Qwen2.5-VL-72B-Instruct")
             response = client.chat.completions.create(
-                model="Qwen/Qwen2-VL-72B-Instruct",
+                model=model_name,
                 messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a professional AI health, nutrition, and exercise feedback assistant."
+                    },
                     {
                         "role": "user",
                         "content": [
