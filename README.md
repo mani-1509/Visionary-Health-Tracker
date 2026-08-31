@@ -1,4 +1,4 @@
-# Visionary Health Tracker 🚀
+# Visionary Health Tracker
 
 [![Author](https://img.shields.io/badge/Author-Sharvan%20Gajula-8b5cf6?style=for-the-badge)](https://www.linkedin.com/in/sharvan-gajula/)
 [![GitHub](https://img.shields.io/badge/GitHub-mani--1509-4c1d95?style=for-the-badge&logo=github)](https://github.com/mani-1509)
@@ -11,31 +11,31 @@
 
 ---
 
-## 🌟 Key Features & Architecture
+## Key Features & Architecture
 
-### 1. 📷 Live Vision & Meal Telemetry
+### 1. Live Vision & Meal Telemetry
 - **Webcam & File Upload**: Real-time camera viewfinder with scanning animations or file/URL drag-and-drop.
 - **Multimodal AI Analysis**: Powered by `Qwen/Qwen2.5-VL-72B-Instruct` to analyze food items for nutritional breakdown, healthier meal alternatives, and exercise form feedback.
 
-### 2. 📊 Vital Signs Telemetry & AI Health Advisor
+### 2. Vital Signs Telemetry & AI Health Advisor
 - **Metric Inputs**: Input vital metrics including Heart Rate (BPM), Blood Pressure (Systolic/Diastolic mmHg), and Daily Caloric Intake (Kcal).
 - **Personalized Recommendations**: Instant LLM-generated health advice tailored to your vital telemetry.
 
-### 3. 📈 Interactive Analytics & Progress Dashboard
+### 3. Interactive Analytics & Progress Dashboard
 - **Chart.js Graphs**: Interactive line charts with smooth curve gradients displaying historical trends.
 - **Metrics Timeline**: History list of recorded metrics with date badges and status pills.
 
-### 4. 🎨 Glassmorphic UI/UX Design System
+### 4. Glassmorphic UI/UX Design System
 - Built with a modern Midnight Purple & Violet glassmorphism design system (`#0f0a21`, `#8b5cf6`, `#f3e8ff`).
 - Integrated Google Fonts (`Plus Jakarta Sans` & `Outfit`), micro-animations, and responsive navbar.
 
-### 5. 🛡️ Authentication & Data Privacy
+### 5. Authentication & Data Privacy
 - User registration & login system with password hashing (`Werkzeug`).
 - Data management settings to view account details or clear metrics history.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Backend**: Python 3.12, Flask 3.1, Flask-SQLAlchemy, Werkzeug, python-dotenv
 - **AI Models & API**: Nebius AI Token Factory API (`https://api.tokenfactory.nebius.com/v1/`), `Qwen/Qwen2.5-VL-72B-Instruct` (Vision), `meta-llama/Llama-3.3-70B-Instruct` (Health Tips)
@@ -45,7 +45,7 @@
 
 ---
 
-## ⚡ Quick Start & Installation
+## Quick Start & Installation
 
 ### Prerequisites
 - Python 3.12 (Recommended)
@@ -90,7 +90,7 @@
 
 ---
 
-## 🧪 Automated Testing
+## Automated Testing
 
 Run the automated test suite with `pytest`:
 
@@ -108,7 +108,7 @@ python -m pytest tests/
 
 ---
 
-## 👤 Author & Contact
+## Author & Contact
 
 **Sharvan Gajula** (`mani-1509`)
 - **GitHub**: [https://github.com/mani-1509](https://github.com/mani-1509)
@@ -117,6 +117,6 @@ python -m pytest tests/
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
