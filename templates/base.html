@@ -1,14 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Visionary Health Tracker | AI-Powered Wellness</title>
     <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
@@ -21,21 +24,48 @@
     <header class="navbar-wrapper">
       <nav class="navbar container-nav">
         <a href="/" class="brand-logo">
-          <img
-            class="logo-img"
-            src="https://res.cloudinary.com/dg0u5ptwr/image/upload/v1736784426/jxi5hdjctt1vxcsjou8d.jpg"
-            alt="Visionary Health Tracker Logo"
-          />
-          <span class="brand-text">Visionary<span class="brand-highlight">Health</span></span>
+          <span class="brand-text"
+            >Visionary<span class="brand-highlight">Health</span></span
+          >
         </a>
 
         <div class="nav-actions">
           <ul class="nav-menu" id="navMenu">
-            <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
-            <li><a href="/camera" class="nav-link {% if request.path == '/camera' %}active{% endif %}">Camera</a></li>
-            <li><a href="/health-metrics" class="nav-link {% if request.path == '/health-metrics' %}active{% endif %}">Metrics</a></li>
-            <li><a href="/profile" class="nav-link {% if request.path == '/profile' %}active{% endif %}">Profile</a></li>
-            <li><a href="/settings" class="nav-link {% if request.path == '/settings' %}active{% endif %}">Settings</a></li>
+            <li>
+              <a
+                href="/"
+                class="nav-link {% if request.path == '/' %}active{% endif %}"
+                >Home</a
+              >
+            </li>
+            <li>
+              <a
+                href="/camera"
+                class="nav-link {% if request.path == '/camera' %}active{% endif %}"
+                >Camera</a
+              >
+            </li>
+            <li>
+              <a
+                href="/health-metrics"
+                class="nav-link {% if request.path == '/health-metrics' %}active{% endif %}"
+                >Metrics</a
+              >
+            </li>
+            <li>
+              <a
+                href="/profile"
+                class="nav-link {% if request.path == '/profile' %}active{% endif %}"
+                >Profile</a
+              >
+            </li>
+            <li>
+              <a
+                href="/settings"
+                class="nav-link {% if request.path == '/settings' %}active{% endif %}"
+                >Settings</a
+              >
+            </li>
           </ul>
 
           <div class="status-badge">
@@ -43,7 +73,11 @@
             <span class="status-text">AI Telemetry</span>
           </div>
 
-          <button class="mobile-toggle" id="menuToggle" aria-label="Toggle navigation">
+          <button
+            class="mobile-toggle"
+            id="menuToggle"
+            aria-label="Toggle navigation"
+          >
             <span></span>
             <span></span>
             <span></span>
@@ -61,8 +95,12 @@
     <footer class="app-footer">
       <div class="footer-container">
         <div class="footer-brand">
-          <span class="brand-text">Visionary<span class="brand-highlight">Health</span></span>
-          <p class="footer-desc">Intelligent health monitoring & computer vision telemetry.</p>
+          <span class="brand-text"
+            >Visionary<span class="brand-highlight">Health</span></span
+          >
+          <p class="footer-desc">
+            Intelligent health monitoring & computer vision telemetry.
+          </p>
         </div>
         <div class="footer-links-wrapper">
           <ul class="footer-links">
@@ -73,8 +111,27 @@
           </ul>
         </div>
         <div class="footer-copy">
-          <p>Created by <a href="https://github.com/mani-1509" target="_blank" rel="noopener" style="color: var(--accent-light); font-weight: 600;">Sharvan Gajula (mani-1509)</a> &bull; Connect on <a href="https://www.linkedin.com/in/sharvan-gajula/" target="_blank" rel="noopener" style="color: #38bdf8; font-weight: 600;">LinkedIn</a></p>
-          <p style="margin-top: 6px;">&copy; 2026 Visionary Health Tracker. All Rights Reserved.</p>
+          <p>
+            Created by
+            <a
+              href="https://github.com/mani-1509"
+              target="_blank"
+              rel="noopener"
+              style="color: var(--accent-light); font-weight: 600"
+              >Sharvan Gajula (mani-1509)</a
+            >
+            &bull; Connect on
+            <a
+              href="https://www.linkedin.com/in/sharvan-gajula/"
+              target="_blank"
+              rel="noopener"
+              style="color: #38bdf8; font-weight: 600"
+              >LinkedIn</a
+            >
+          </p>
+          <p style="margin-top: 6px">
+            &copy; 2026 Visionary Health Tracker. All Rights Reserved.
+          </p>
         </div>
       </div>
     </footer>
